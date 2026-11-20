@@ -1,0 +1,202 @@
+[
+  {
+    "id": "E01",
+    "name": "LedgerOne API access log",
+    "file": "E01_ledgerone_api_access.csv",
+    "source": "LedgerOne Finance System",
+    "type": "CSV",
+    "period": "03 Jun to 31 Aug 2026",
+    "records": 30128,
+    "reliability": "High (Time in UTC. Older records purged)"
+  },
+  {
+    "id": "E02",
+    "name": "HelpDeskr audit log",
+    "file": "E02_helpdeskr_audit_log.csv",
+    "source": "HelpDeskr Support System",
+    "type": "CSV",
+    "period": "03 Jun to 31 Aug 2026",
+    "records": 21450,
+    "reliability": "High (Time in IST local. Complete audit log)"
+  },
+  {
+    "id": "E03",
+    "name": "SSO sign-in log",
+    "file": "E03_sso_signin_log.csv",
+    "source": "Central Identity Provider",
+    "type": "CSV",
+    "period": "01 Jun to 31 Aug 2026",
+    "records": 22894,
+    "reliability": "High (Records user interactive logins. Does not track API tokens)"
+  },
+  {
+    "id": "E04",
+    "name": "Connected software register",
+    "file": "E04_connected_software_register.json",
+    "source": "IT Asset Management",
+    "type": "JSON",
+    "period": "Current snapshot (02 Sep 2026)",
+    "records": 8,
+    "reliability": "Current state only. Prior history not retained"
+  },
+  {
+    "id": "E05",
+    "name": "BlueVault access log",
+    "file": "E05_bluevault_access_log.csv",
+    "source": "BlueVault Cloud Storage",
+    "type": "CSV",
+    "period": "03 Jun to 31 Aug 2026",
+    "records": 7914,
+    "reliability": "Medium (Unsynchronized clock drift, some missing source IPs)"
+  },
+  {
+    "id": "E06",
+    "name": "Billing alert & invoice",
+    "file": "E06_billing_alert_and_invoice.pdf",
+    "source": "HelpDeskr Billing / Accounts",
+    "type": "PDF",
+    "period": "24 Aug 2026",
+    "records": 1,
+    "reliability": "High (Official vendor overage notice for 14 bulk exports)"
+  },
+  {
+    "id": "E07",
+    "name": "Onboarding review file",
+    "file": "E07_onboarding_review_file.pdf",
+    "source": "Finance IT Due Diligence",
+    "type": "PDF",
+    "period": "05 Jun 2024",
+    "records": 1,
+    "reliability": "High (Scope: invoices, vendors, payments, tickets. No CISO signoff)"
+  },
+  {
+    "id": "E08",
+    "name": "Master Services Agreement excerpt",
+    "file": "E08_contract_excerpt.pdf",
+    "source": "Legal Department",
+    "type": "PDF",
+    "period": "10 Jun 2024",
+    "records": 1,
+    "reliability": "High (Clauses 5.1, 5.3, 14.1, 14.3)"
+  },
+  {
+    "id": "E09",
+    "name": "Risk register extract",
+    "file": "E09_risk_register_extract.xlsx",
+    "source": "Risk & Compliance",
+    "type": "XLSX",
+    "period": "2025 - 2026",
+    "records": 12,
+    "reliability": "High (Identifies integration risk & lack of annual reviews)"
+  },
+  {
+    "id": "E10",
+    "name": "IT security policy v2.1",
+    "file": "E10_it_security_policy_v2_1.pdf",
+    "source": "CISO Office / IT Security",
+    "type": "PDF",
+    "period": "01 Jan 2025",
+    "records": 1,
+    "reliability": "High (Mandates IP whitelisting & annual rotation for high-risk keys)"
+  },
+  {
+    "id": "E11",
+    "name": "Internal audit report IA-2025-09",
+    "file": "E11_internal_audit_report_IA_2025_09.pdf",
+    "source": "Internal Audit",
+    "type": "PDF",
+    "period": "12 Sep 2025",
+    "records": 1,
+    "reliability": "High (Noted unrotated credentials and key-sharing vulnerabilities)"
+  },
+  {
+    "id": "E12",
+    "name": "Vendor initial email notice",
+    "file": "E12_email_notice.pdf",
+    "source": "TallyBridge Customer Trust",
+    "type": "PDF",
+    "period": "21 Aug 2026 19:32 IST",
+    "records": 1,
+    "reliability": "Initial notification claiming no customer data access"
+  },
+  {
+    "id": "E13",
+    "name": "Support team chat export",
+    "file": "E13_support_team_chat_export.json",
+    "source": "Team Chat Workspace",
+    "type": "JSON",
+    "period": "25 Jun to 25 Aug 2026",
+    "records": 16,
+    "reliability": "High (Real-time discussions; confirms key bvk-7f3a in TKT-48213)"
+  },
+  {
+    "id": "E14",
+    "name": "Staff roster",
+    "file": "E14_staff_roster.csv",
+    "source": "HR Operations",
+    "type": "CSV",
+    "period": "Active staff roster",
+    "records": 420,
+    "reliability": "High (Employee accounts, departments, termination dates)"
+  },
+  {
+    "id": "E15",
+    "name": "Private-link flow log",
+    "file": "E15_network_link_flow_log.csv",
+    "source": "AWS / Azure PrivateLink Gateway",
+    "type": "CSV",
+    "period": "03 Jun to 31 Aug 2026",
+    "records": 9790,
+    "reliability": "High (Tracks tun-tb-01 traffic between TallyBridge hosts & H&F)"
+  },
+  {
+    "id": "E16",
+    "name": "Vendor follow-up investigation email",
+    "file": "E16_followup_email_notice.pdf",
+    "source": "TallyBridge Customer Trust",
+    "type": "PDF",
+    "period": "28 Aug 2026 18:10 IST",
+    "records": 1,
+    "reliability": "Core incident explanation containing 7 contested claims"
+  },
+  {
+    "id": "E17",
+    "name": "Vendor indicator list",
+    "file": "E17_indicator_list.csv",
+    "source": "TallyBridge Security",
+    "type": "CSV",
+    "period": "Attached to E16",
+    "records": 5,
+    "reliability": "Vendor-provided indicators (incomplete and misleading)"
+  },
+  {
+    "id": "E18",
+    "name": "September LedgerOne API access log",
+    "file": "E18_ledgerone_api_access_1_to_7_sep.csv",
+    "source": "LedgerOne Finance System",
+    "type": "CSV",
+    "period": "01 Sep to 07 Sep 2026",
+    "records": 2891,
+    "reliability": "High (Contains 03 Sep bank account modification via key-tb-07)"
+  },
+  {
+    "id": "E19",
+    "name": "Vendor master change log",
+    "file": "E19_vendor_master_change_log.csv",
+    "source": "LedgerOne Master Records",
+    "type": "CSV",
+    "period": "03 Jun to 07 Sep 2026",
+    "records": 367,
+    "reliability": "High (Logs all changes to vendor bank accounts and contacts)"
+  },
+  {
+    "id": "E20",
+    "name": "Public records pack",
+    "file": "E20_public_records_pack.pdf",
+    "source": "OSINT & WHOIS dossier",
+    "type": "PDF",
+    "period": "Compiled 02 Sep 2026",
+    "records": 1,
+    "reliability": "Secondary OSINT reference"
+  }
+]
