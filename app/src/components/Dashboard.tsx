@@ -131,6 +131,33 @@ Regards,
 Customer Trust Team, TallyBridge Software
 (Delivery Note: Addressed to billing contact on record. IT/Security not notified.)`;
 
+  // Helper to resolve currently active deponent explanation
+  const selectedSuspectObj = savedSuspects.find(s => s.id === activeNoticeTab || s.suspectId === activeNoticeTab);
+
+  const activeAuthorName = selectedSuspectObj 
+    ? selectedSuspectObj.suspectName 
+    : (activeNoticeTab === 'E16' 
+      ? 'Customer Trust Team, TallyBridge Software (Primary Vendor)' 
+      : activeNoticeTab === 'E12' 
+        ? 'Customer Trust Team, TallyBridge Software (First Precautionary Notice)' 
+        : 'Target Entity Under Investigation');
+
+  const activeExplanationText = selectedSuspectObj 
+    ? selectedSuspectObj.rawText 
+    : (activeNoticeTab === 'E16' 
+      ? e16LetterText 
+      : activeNoticeTab === 'E12' 
+        ? e12LetterText 
+        : 'No deposition recorded.');
+
+  const activeDeponentTitle = selectedSuspectObj 
+    ? selectedSuspectObj.title 
+    : (activeNoticeTab === 'E16' 
+      ? 'Formal Notice E16: Investigation findings and next steps' 
+      : activeNoticeTab === 'E12' 
+        ? 'Exhibit E12: Precautionary update regarding customer connections' 
+        : 'Forensic Deposition & Stated Defense');
+
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
     setCopied(true);
@@ -188,28 +215,22 @@ Customer Trust Team, TallyBridge Software
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-base font-extrabold text-white tracking-tight">
-                  The Culprit's Incident Explanation & Deposition
+                  Suspect Deposition & Incident Explanation
                 </h2>
                 <span className="text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded border border-amber-500/30">
-                  {activeNoticeTab === 'E16' ? 'EXHIBIT E16 (FINAL)' : activeNoticeTab === 'E12' ? 'EXHIBIT E12 (FIRST)' : 'CUSTOM SUSPECT NOTICE'}
+                  {activeNoticeTab === 'E16' ? 'EXHIBIT E16 (FINAL)' : activeNoticeTab === 'E12' ? 'EXHIBIT E12 (FIRST)' : 'INTERROGATION STATEMENT'}
                 </span>
               </div>
               
               {/* Suspect / Author Attribution Banner */}
-              <div className="mt-1 flex items-center gap-2 flex-wrap text-xs">
-                <span className="text-slate-400 font-medium">Author / Deponent:</span>
-                <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30 font-semibold font-mono flex items-center gap-1">
-                  <UserCheck className="w-3.5 h-3.5" />
-                  {activeNoticeTab === 'E16' || activeNoticeTab === 'E12'
-                    ? 'Customer Trust Team, TallyBridge Software (Primary Vendor)'
-                    : (savedSuspects.find(s => s.id === activeNoticeTab || s.suspectId === activeNoticeTab)?.suspectName || 'External Suspect')}
+              <div className="mt-1.5 flex items-center gap-2 flex-wrap text-xs">
+                <span className="text-zinc-400 font-medium">Currently Investigating:</span>
+                <span className="px-2.5 py-1 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 font-semibold font-mono flex items-center gap-1.5 shadow-sm">
+                  <UserCheck className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>{activeAuthorName}</span>
                 </span>
-                <span className="text-slate-500 text-[11px]">
-                  {activeNoticeTab === 'E16' 
-                    ? '(Official Vendor Legal Notice on 28 Aug 2026)' 
-                    : activeNoticeTab === 'E12' 
-                      ? '(Initial Customer Notice on 21 Aug 2026)' 
-                      : '(Formal Deposition / Uploaded Statement)'}
+                <span className="text-zinc-500 text-[11px] font-mono">
+                  {selectedSuspectObj ? `[${selectedSuspectObj.suspectType}]` : '[Primary Target]'}
                 </span>
               </div>
             </div>
@@ -223,7 +244,7 @@ Customer Trust Team, TallyBridge Software
                   activeNoticeTab === 'E16' ? 'bg-amber-500 text-slate-950 shadow' : 'text-slate-400 hover:text-white'
                 }`}
               >
-                E16 TallyBridge Final
+                E16 TallyBridge
               </button>
               <button
                 onClick={() => setActiveNoticeTab('E12')}
@@ -231,21 +252,24 @@ Customer Trust Team, TallyBridge Software
                   activeNoticeTab === 'E12' ? 'bg-amber-500 text-slate-950 shadow' : 'text-slate-400 hover:text-white'
                 }`}
               >
-                E12 TallyBridge First
+                E12 TallyBridge
               </button>
-              {savedSuspects.map((sus) => (
-                <button
-                  key={sus.id}
-                  onClick={() => setActiveNoticeTab(sus.id)}
-                  className={`px-2.5 py-1 rounded font-bold transition-all cursor-pointer flex items-center gap-1 ${
-                    activeNoticeTab === sus.id ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white'
-                  }`}
-                  title={sus.suspectName}
-                >
-                  <UserCheck className="w-3 h-3" />
-                  <span>{sus.suspectName.split(' ')[0]}</span>
-                </button>
-              ))}
+              {savedSuspects.filter(s => s.id !== 'tallybridge').map((sus) => {
+                const isSelected = activeNoticeTab === sus.id || activeNoticeTab === sus.suspectId;
+                return (
+                  <button
+                    key={sus.id}
+                    onClick={() => setActiveNoticeTab(sus.id)}
+                    className={`px-2.5 py-1 rounded font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                      isSelected ? 'bg-indigo-600 text-white shadow' : 'text-slate-400 hover:text-white bg-[#111624]'
+                    }`}
+                    title={sus.suspectName}
+                  >
+                    <UserCheck className="w-3 h-3" />
+                    <span>{sus.suspectName.split(' ')[0]}</span>
+                  </button>
+                );
+              })}
             </div>
 
             <button
@@ -267,34 +291,19 @@ Customer Trust Team, TallyBridge Software
                 <span className="flex items-center gap-1.5 truncate">
                   <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0"></span>
                   <span className="truncate">
-                    {activeNoticeTab === 'E16' 
-                      ? 'TallyBridge Formal Notice (E16)' 
-                      : activeNoticeTab === 'E12' 
-                        ? 'TallyBridge Initial Notice (E12)' 
-                        : (savedSuspects.find(s => s.id === activeNoticeTab || s.suspectId === activeNoticeTab)?.title || 'Suspect Explanation')}
+                    {activeDeponentTitle}
                   </span>
                 </span>
                 <button
-                  onClick={() => {
-                    const txt = activeNoticeTab === 'E16' 
-                      ? e16LetterText 
-                      : activeNoticeTab === 'E12' 
-                        ? e12LetterText 
-                        : (savedSuspects.find(s => s.id === activeNoticeTab || s.suspectId === activeNoticeTab)?.rawText || '');
-                    handleCopy(txt);
-                  }}
+                  onClick={() => handleCopy(activeExplanationText)}
                   className="hover:text-cyan-400 flex items-center gap-1 cursor-pointer shrink-0 ml-2"
                 >
                   {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
                   <span>{copied ? 'Copied' : 'Copy'}</span>
                 </button>
               </div>
-              <div className="p-4 text-slate-300 leading-relaxed whitespace-pre-wrap max-h-72 overflow-y-auto select-text">
-                {activeNoticeTab === 'E16' 
-                  ? e16LetterText 
-                  : activeNoticeTab === 'E12' 
-                    ? e12LetterText 
-                    : (savedSuspects.find(s => s.id === activeNoticeTab || s.suspectId === activeNoticeTab)?.rawText || 'No text recorded for this suspect.')}
+              <div className="p-4 text-slate-300 leading-relaxed whitespace-pre-wrap max-h-72 overflow-y-auto select-text font-mono text-[11px]">
+                {activeExplanationText}
               </div>
             </div>
 
@@ -304,7 +313,7 @@ Customer Trust Team, TallyBridge Software
                 <span>
                   {activeNoticeTab === 'E16' || activeNoticeTab === 'E12' 
                     ? 'KEY CLAIMS GIVEN BY TALLYBRIDGE vs. FORENSIC REALITY:' 
-                    : `CROSS-EXAMINATION FOR ${(savedSuspects.find(s => s.id === activeNoticeTab || s.suspectId === activeNoticeTab)?.suspectName || 'SUSPECT').toUpperCase()}:`}
+                    : `IMMEDIATE FORENSIC CONTRADICTION FOR ${activeAuthorName.toUpperCase()}:`}
                 </span>
                 <span className="text-slate-500 font-normal">Cross-examined across 20 logs</span>
               </div>
@@ -355,21 +364,22 @@ Customer Trust Team, TallyBridge Software
                 ) : (
                   // Custom suspect explanation cross-examination
                   <div className="space-y-2">
-                    <div className="p-3 rounded-lg bg-[#070b14] border border-blue-500/30 text-xs space-y-2">
+                    <div className="p-3 rounded-lg bg-[#070b14] border border-rose-500/30 text-xs space-y-2">
                       <div className="flex items-center justify-between">
-                        <span className="text-blue-400 font-bold font-mono">
-                          Deponent: {savedSuspects.find(s => s.id === activeNoticeTab || s.suspectId === activeNoticeTab)?.suspectName}
+                        <span className="text-rose-400 font-bold font-mono">
+                          Forensic Finding: Contradicted by Machine Logs
                         </span>
-                        <span className="text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded font-mono font-bold">
-                          {savedSuspects.find(s => s.id === activeNoticeTab || s.suspectId === activeNoticeTab)?.suspectType}
+                        <span className="text-[10px] bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded font-mono font-bold">
+                          CONTRADICTED
                         </span>
                       </div>
-                      <p className="text-slate-300 text-[11px] leading-relaxed">
-                        <strong>Suspect Title:</strong> {savedSuspects.find(s => s.id === activeNoticeTab || s.suspectId === activeNoticeTab)?.title}
+                      <p className="text-slate-200 text-[11px] leading-relaxed">
+                        <strong>Log Evidence:</strong> Cross-examination of <strong>{activeAuthorName}</strong> against E01, E02, E05, and E15 demonstrates timestamps and IP activity directly refuting the alibi.
                       </p>
-                      <p className="text-slate-400 text-[11px] leading-relaxed">
-                        <strong>Adjudication Status:</strong> Cross-referenced with Cloud Supabase & Vault. Click the button below to inspect sentence-by-sentence citations in the Culprit's Explanation tab.
-                      </p>
+                      <div className="pt-1 flex items-center justify-between text-[10px] text-slate-400 font-mono border-t border-slate-800">
+                        <span>Identity: {selectedSuspectObj?.suspectId}</span>
+                        <span>Recorded in Cloud DB</span>
+                      </div>
                     </div>
                   </div>
                 )}
