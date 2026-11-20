@@ -2,15 +2,18 @@
 
 @layer base {
   :root {
-    --bg-main: #0b0f17;
-    --bg-surface: #111827;
-    --bg-card: #151d2f;
-    --bg-sidebar: #0e1422;
-    --border-color: #1e293b;
-    --border-subtle: #27354a;
-    --text-primary: #f8fafc;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
+    /* Linear / Raycast Ultra-Modern Zinc Palette */
+    --bg-main: #08090a;
+    --bg-surface: #0e1015;
+    --bg-card: #12151c;
+    --bg-sidebar: #0a0c10;
+    --border-color: #1e222b;
+    --border-subtle: #262c37;
+    --text-primary: #f4f5f8;
+    --text-secondary: #9da6b8;
+    --text-muted: #646d82;
+    --accent-primary: #6366f1; /* Indigo */
+    --accent-secondary: #8b5cf6; /* Violet */
   }
 
   .theme-light {
@@ -23,24 +26,26 @@
     --text-primary: #0f172a;
     --text-secondary: #475569;
     --text-muted: #64748b;
+    --accent-primary: #4f46e5;
+    --accent-secondary: #7c3aed;
   }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    letter-spacing: -0.011em;
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    letter-spacing: -0.015em;
   }
 
   code,
   pre,
   .font-mono {
-    font-family: "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-family: "JetBrains Mono", "SF Mono", Menlo, Monaco, Consolas, monospace;
   }
 }
 
 /* Dynamic theme background & text utilities */
 .theme-dark {
-  background-color: #0b0f17;
-  color: #f8fafc;
+  background-color: #08090a;
+  color: #f4f5f8;
 }
 
 .theme-light {
@@ -48,66 +53,75 @@
   color: #0f172a;
 }
 
-/* Legal Dossier & Minimalist Executive Aesthetics */
-.theme-dark .executive-card {
-  background: #111827;
-  border: 1px solid #1f293d;
-  border-radius: 12px;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px -1px rgba(0, 0, 0, 0.3);
+/* Linear / Raycast Style Glassmorphism & Chrome Borders */
+.theme-dark .linear-card {
+  background: linear-gradient(180deg, rgba(20, 24, 33, 0.75) 0%, rgba(13, 16, 23, 0.85) 100%);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.theme-dark .executive-card:hover {
-  border-color: #334155;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
-  transform: translateY(-2px);
+.theme-dark .linear-card:hover {
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.65), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+  transform: translateY(-1.5px);
 }
 
-.theme-light .executive-card {
+.theme-light .linear-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+  border-radius: 14px;
+  box-shadow: 0 4px 15px -2px rgba(0, 0, 0, 0.04), 0 1px 2px 0 rgba(0, 0, 0, 0.02);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.theme-light .executive-card:hover {
+.theme-light .linear-card:hover {
   border-color: #cbd5e1;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
-  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -4px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1.5px);
 }
 
+/* Raycast Subtle Dot-Matrix Background */
 .theme-dark .dossier-subtle-grid {
-  background-size: 24px 24px;
-  background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-color: #08090a;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 20px 20px;
 }
 
 .theme-light .dossier-subtle-grid {
-  background-size: 24px 24px;
-  background-image:
-    linear-gradient(to right, rgba(0, 0, 0, 0.03) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-color: #f8fafc;
+  background-image: radial-gradient(rgba(0, 0, 0, 0.07) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Glow Badges */
+.linear-glow-violet {
+  box-shadow: 0 0 20px -4px rgba(139, 92, 246, 0.3);
+}
+
+.linear-glow-indigo {
+  box-shadow: 0 0 20px -4px rgba(99, 102, 241, 0.3);
 }
 
 /* Clean Custom Scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 .theme-dark ::-webkit-scrollbar-track {
-  background: #0b0f17;
+  background: #08090a;
 }
 
 .theme-dark ::-webkit-scrollbar-thumb {
-  background: #1e293b;
-  border-radius: 6px;
+  background: #222733;
+  border-radius: 4px;
 }
 
 .theme-dark ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #363e52;
 }
 
 .theme-light ::-webkit-scrollbar-track {
@@ -116,7 +130,7 @@
 
 .theme-light ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
-  border-radius: 6px;
+  border-radius: 4px;
 }
 
 .theme-light ::-webkit-scrollbar-thumb:hover {

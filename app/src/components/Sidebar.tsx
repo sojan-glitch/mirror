@@ -72,18 +72,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div>
         {/* Brand Header */}
         <div className={`p-4 border-b flex items-center justify-between ${
-          isDark ? 'border-[#1e293b] bg-[#0c121e]' : 'border-slate-200 bg-slate-50/70'
+          isDark ? 'border-[#1e222b] bg-[#090b0e]' : 'border-slate-200 bg-slate-50/70'
         }`}>
           <div className="flex items-center space-x-3">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-b from-blue-600 to-indigo-700 flex items-center justify-center shadow-md shadow-blue-900/30 ring-1 ring-blue-400/30">
-              <ShieldCheck className="w-5 h-5 text-white" />
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-md shadow-indigo-950/40 ring-1 ring-white/10 linear-glow-violet">
+              <ShieldCheck className="w-4 h-4 text-white" />
             </div>
             <div>
-              <div className={`text-sm font-bold tracking-tight flex items-center gap-1.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                <span>PROJECT MIRROR</span>
+              <div className={`text-sm font-semibold tracking-tight flex items-center gap-1.5 ${isDark ? 'text-zinc-100' : 'text-slate-900'}`}>
+                <span>MIRROR</span>
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                  DEFENSE
+                </span>
               </div>
-              <div className={`text-[10px] font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                Forensic Defense Dossier
+              <div className={`text-[10px] font-mono ${isDark ? 'text-zinc-500' : 'text-slate-500'}`}>
+                Incident Reconstruction
               </div>
             </div>
           </div>
@@ -94,24 +97,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
             title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}
             className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
               isDark 
-                ? 'bg-[#151f33] border-[#223352] text-amber-300 hover:text-white hover:bg-[#1d2b47]' 
+                ? 'bg-[#151922] border-[#252c3d] text-zinc-400 hover:text-white hover:bg-[#1e2433]' 
                 : 'bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900 hover:bg-slate-200'
             }`}
           >
-            {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
           </button>
         </div>
 
         {/* Case Reference Card */}
-        <div className={`p-3 mx-3 my-3 rounded-lg border text-xs space-y-1.5 ${
+        <div className={`p-3 mx-3 my-3 rounded-xl border text-xs space-y-1.5 ${
           isDark 
-            ? 'bg-[#141d2f] border-[#1e2e46]' 
-            : 'bg-slate-50 border-slate-200'
+            ? 'bg-[#12151c]/70 border-[#1f2430] text-zinc-300 shadow-sm' 
+            : 'bg-slate-50 border-slate-200 text-slate-700'
         }`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1.5">
-              <FolderLock className="w-3.5 h-3.5 text-blue-500" />
-              <span className={`text-[10px] uppercase font-semibold tracking-wider ${isDark ? 'text-blue-300' : 'text-blue-700'}`}>
+              <FolderLock className="w-3.5 h-3.5 text-indigo-400" />
+              <span className={`text-[10px] uppercase font-semibold tracking-wider font-mono ${isDark ? 'text-indigo-400' : 'text-indigo-700'}`}>
                 Case CR-26-047
               </span>
             </div>
@@ -123,12 +126,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
               Verified
             </span>
           </div>
-          <div className={`font-semibold text-xs truncate ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
+          <div className={`font-semibold text-xs truncate ${isDark ? 'text-zinc-200' : 'text-slate-900'}`}>
             Harbor & Finch v. TallyBridge
           </div>
-          <div className={`text-[10px] flex items-center justify-between pt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+          <div className={`text-[10px] flex items-center justify-between pt-0.5 ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
             <span>Target: TallyBridge Software</span>
-            <span className={`font-medium ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>7 Core Claims</span>
+            <span className={`font-mono text-[9px] ${isDark ? 'text-zinc-400' : 'text-slate-700'}`}>7 Core Claims</span>
           </div>
         </div>
 
@@ -143,9 +146,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onClick={() => setActiveTab(item.id)}
                 className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 cursor-pointer ${
                   isActive
-                    ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20 font-semibold'
+                    ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-sm shadow-indigo-600/30 font-semibold'
                     : isDark 
-                      ? 'text-slate-400 hover:text-slate-200 hover:bg-[#152033]' 
+                      ? 'text-zinc-400 hover:text-zinc-200 hover:bg-[#141720]' 
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 }`}
               >

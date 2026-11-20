@@ -66,7 +66,7 @@ export default function App() {
 
   return (
     <div className={`flex h-screen w-screen overflow-hidden antialiased font-sans transition-colors duration-200 theme-${theme} ${
-      theme === 'dark' ? 'bg-[#0b0f17] text-slate-100' : 'bg-[#f8fafc] text-slate-900'
+      theme === 'dark' ? 'bg-[#08090a] text-zinc-100' : 'bg-[#f8fafc] text-slate-900'
     }`}>
       {/* Navigation Sidebar */}
       <Sidebar 
