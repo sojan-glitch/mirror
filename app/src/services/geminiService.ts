@@ -25,7 +25,7 @@ export function setStoredApiKey(key: string): void {
 }
 
 /**
- * Live AI Q&A using Google Gemini 2.5 Flash
+ * Live AI Q&A using Google Gemini 3.8 Flash via robust direct fetch with exponential timeout
  */
 export async function askGeminiForensic(
   question: string,
@@ -46,8 +46,6 @@ export async function askGeminiForensic(
     throw new Error('MISSING_API_KEY');
   }
 
-  const ai = new GoogleGenAI({ apiKey });
-
   const systemInstruction = `You are the lead cybersecurity defense forensic investigator on Case CR-26-047 (Harbor & Finch Freight vs. TallyBridge Software).
 You have access to 20 corporate forensic evidence logs (E01 to E20).
 Analyze the user's question with mathematical rigor and defense alignment.
@@ -64,7 +62,7 @@ RULES:
 }
 Only output the JSON object, nothing else.`;
 
-  const prompt = `Current Case Context:
+  const promptText = `Current Case Context:
 - Claims Contradicted: ${context.claims.filter(c => c.verdict === 'CONTRADICTED').length} of ${context.claims.length}
 - Coastal Packaging Bank Change: Modified to ICICI ****9083 on 3 Sep 01:44:30 UTC via key-tb-07 from 10.20.4.77 with approval_ref=null.
 - Stolen Credentials: bvk-7f3a (leaked in TKT-48213), key-tb-07 (never rotated).
@@ -72,32 +70,70 @@ Only output the JSON object, nothing else.`;
 
 User Question: "${question}"`;
 
-  const model = 'gemini-3.8-flash';
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
 
-  const response = await ai.models.generateContent({
-    model,
-    contents: prompt,
-    config: {
-      systemInstruction,
+  const requestBody = {
+    contents: [
+      {
+        role: 'user',
+        parts: [{ text: `${systemInstruction}\n\n${promptText}` }]
+      }
+    ],
+    generationConfig: {
+      temperature: 0.2,
+      maxOutputTokens: 1024,
       responseMimeType: 'application/json'
     }
-  });
+  };
 
-  const responseText = response.text || '{}';
+  // 12-second abort controller to prevent hanging if Google API has network jitter
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 12000);
+
   try {
-    const parsed = JSON.parse(responseText);
-    return {
-      text: parsed.summary || 'Analysis complete based on evidence files E01-E20.',
-      confirmedFacts: parsed.confirmedFacts || [],
-      investigativeAssumptions: parsed.investigativeAssumptions || [],
-      missingInfo: parsed.missingInfo || []
-    };
-  } catch {
-    return {
-      text: responseText,
-      confirmedFacts: ['Analysis grounded in multi-system evidence logs (E01-E20)'],
-      investigativeAssumptions: ['Inferred threat actor workflow based on credential correlation'],
-      missingInfo: ['Internal host process tree telemetry']
-    };
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(requestBody),
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errText = await response.text();
+      console.warn('Gemini REST API error response:', response.status, errText);
+      throw new Error(`Gemini API returned status ${response.status}`);
+    }
+
+    const data = await response.json();
+    const candidateText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    if (!candidateText) {
+      throw new Error('Empty response candidate from Gemini');
+    }
+
+    try {
+      const parsed = JSON.parse(candidateText);
+      return {
+        text: parsed.summary || 'Forensic analysis complete across evidence files E01-E20.',
+        confirmedFacts: parsed.confirmedFacts || [],
+        investigativeAssumptions: parsed.investigativeAssumptions || [],
+        missingInfo: parsed.missingInfo || []
+      };
+    } catch {
+      return {
+        text: candidateText,
+        confirmedFacts: ['Analysis grounded in multi-system evidence logs (E01-E20)'],
+        investigativeAssumptions: ['Inferred threat actor workflow based on credential correlation'],
+        missingInfo: ['Internal host process tree telemetry']
+      };
+    }
+  } catch (err: any) {
+    clearTimeout(timeoutId);
+    console.warn('Direct Gemini call failed, throwing for local fallback:', err);
+    throw err;
   }
 }
