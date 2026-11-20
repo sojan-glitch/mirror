@@ -10,6 +10,7 @@ import { IncidentUpload } from './components/IncidentUpload';
 import { CulpritNoticeViewer } from './components/CulpritNoticeViewer';
 import { AiAssistant } from './components/AiAssistant';
 import { EvidenceRelationshipGraph } from './components/EvidenceRelationshipGraph';
+import { ThreeStepAuthModal, AuthSession } from './components/ThreeStepAuthModal';
 
 import claimsDataRaw from './data/claims_data.json';
 import evidenceCatalogRaw from './data/evidence_catalog.json';
@@ -29,6 +30,21 @@ export default function App() {
   const [sampleRecords] = useState<Record<string, { fields: string[]; rows: any[] }>>(sampleRecordsRaw);
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<string | null>('E01');
   const [activeModalClaim, setActiveModalClaim] = useState<VendorClaim | null>(null);
+
+  // 3-Step Verification Auth State
+  const [authSession, setAuthSession] = useState<AuthSession | null>(() => {
+    try {
+      const saved = localStorage.getItem('mirror_auth_session');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const handleLogout = () => {
+    localStorage.removeItem('mirror_auth_session');
+    setAuthSession(null);
+  };
 
   // Claim counts for sidebar
   const claimsCount = {
@@ -56,10 +72,20 @@ export default function App() {
       <Sidebar 
         activeTab={activeTab} 
         setActiveTab={setActiveTab} 
-        theme={theme}
-        setTheme={setTheme}
+        theme={theme} 
+        setTheme={setTheme} 
         claimsCount={claimsCount} 
+        officerSession={authSession}
+        onLogout={handleLogout}
       />
+
+      {/* 3-Step Verification Modal if not authenticated */}
+      {!authSession && (
+        <ThreeStepAuthModal
+          onSuccess={(session) => setAuthSession(session)}
+          theme={theme}
+        />
+      )}
 
       {/* Main View Area */}
       <main className="flex-1 overflow-y-auto p-6 md:p-8 dossier-subtle-grid">

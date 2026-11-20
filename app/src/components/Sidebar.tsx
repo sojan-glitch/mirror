@@ -13,7 +13,9 @@ import {
   Scale,
   FolderLock,
   Sun,
-  Moon
+  Moon,
+  LogOut,
+  UserCheck
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -28,6 +30,13 @@ interface SidebarProps {
     mixed: number;
     unverified: number;
   };
+  officerSession?: {
+    badgeId: string;
+    officerName: string;
+    role: string;
+    clearanceLevel: string;
+  } | null;
+  onLogout?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ 
@@ -35,7 +44,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   setActiveTab, 
   theme, 
   setTheme, 
-  claimsCount 
+  claimsCount,
+  officerSession,
+  onLogout
 }) => {
   const isDark = theme === 'dark';
 
@@ -158,6 +169,41 @@ export const Sidebar: React.FC<SidebarProps> = ({
           })}
         </nav>
       </div>
+
+      {/* Officer Clearance Session */}
+      {officerSession && (
+        <div className={`mx-3 mb-2 p-2.5 rounded-lg border text-xs ${
+          isDark 
+            ? 'bg-blue-950/20 border-blue-900/40 text-slate-300' 
+            : 'bg-blue-50 border-blue-200 text-blue-900'
+        }`}>
+          <div className="flex items-center justify-between mb-1">
+            <span className="flex items-center gap-1.5 font-semibold text-[11px] text-blue-400">
+              <UserCheck className="w-3.5 h-3.5" />
+              {officerSession.officerName.split(' ')[0]} {officerSession.officerName.split(' ')[1] || ''}
+            </span>
+            <span className="text-[9px] font-mono text-emerald-400 bg-emerald-500/10 px-1 py-0.5 rounded border border-emerald-500/20">
+              3-STEP VERIFIED
+            </span>
+          </div>
+          <div className="text-[10px] text-slate-400 font-mono truncate">
+            {officerSession.badgeId} • {officerSession.role}
+          </div>
+          {onLogout && (
+            <button
+              onClick={onLogout}
+              className={`mt-2 w-full flex items-center justify-center space-x-1.5 py-1 px-2 rounded text-[10px] font-medium transition cursor-pointer ${
+                isDark 
+                  ? 'bg-slate-800/80 hover:bg-rose-950/40 hover:text-rose-300 border border-slate-700/60' 
+                  : 'bg-white hover:bg-rose-50 hover:text-rose-600 border border-slate-200'
+              }`}
+            >
+              <LogOut className="w-3 h-3 text-rose-400" />
+              <span>Lock Terminal / Logout</span>
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Footer Info */}
       <div className={`p-3 border-t text-[10px] flex items-center justify-between ${
