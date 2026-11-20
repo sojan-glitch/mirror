@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ShieldCheck, 
   AlertOctagon, 
@@ -11,21 +11,27 @@ import {
   Building2, 
   Calendar, 
   Lock, 
-  ExternalLink,
-  Flame,
-  Terminal,
-  Cpu,
-  Layers,
-  Sparkles,
-  Zap,
-  Radio,
-  Mail,
-  Copy,
-  Check,
-  ChevronDown,
-  ChevronUp
+  ExternalLink, 
+  Flame, 
+  Terminal, 
+  Cpu, 
+  Layers, 
+  Sparkles, 
+  Zap, 
+  Radio, 
+  Mail, 
+  Copy, 
+  Check, 
+  ChevronDown, 
+  ChevronUp,
+  UserCheck,
+  Server,
+  Network,
+  Database
 } from 'lucide-react';
 import { VendorClaim, EvidenceItem, TimelineEvent } from '../types';
+import { getPersistedExplanations, SavedExplanation } from '../services/storageService';
+import { getSupabaseClient } from '../services/supabaseClient';
 
 interface DashboardProps {
   claims: VendorClaim[];
@@ -42,9 +48,38 @@ export const Dashboard: React.FC<DashboardProps> = ({
   setActiveTab,
   onSelectClaim 
 }) => {
-  const [activeNoticeTab, setActiveNoticeTab] = useState<'E16' | 'E12'>('E16');
+  const [activeNoticeTab, setActiveNoticeTab] = useState<string>('E16');
   const [copied, setCopied] = useState<boolean>(false);
   const [showFullLetter, setShowFullLetter] = useState<boolean>(true);
+  const [savedSuspects, setSavedSuspects] = useState<SavedExplanation[]>([]);
+
+  useEffect(() => {
+    // Load local explanations
+    const local = getPersistedExplanations();
+    setSavedSuspects(local);
+
+    // Fetch cloud Supabase explanations
+    const supabase = getSupabaseClient();
+    if (supabase) {
+      supabase.from('suspect_explanations').select('*').order('created_at', { ascending: false })
+        .then(({ data, error }) => {
+          if (!error && data && data.length > 0) {
+            const mapped: SavedExplanation[] = data.map((d: any) => ({
+              id: d.id,
+              suspectId: d.suspect_id,
+              suspectName: d.suspect_name,
+              suspectType: d.suspect_type,
+              title: d.title,
+              timestamp: new Date(d.created_at).toLocaleString(),
+              rawText: d.raw_text,
+              claimsCount: d.claims_count || 0,
+              adjudicatedClaims: []
+            }));
+            setSavedSuspects(mapped);
+          }
+        });
+    }
+  }, []);
 
   const contradictedCount = claims.filter(c => c.verdict === 'CONTRADICTED').length;
   const supportedCount = claims.filter(c => c.verdict === 'SUPPORTED').length;
@@ -151,29 +186,44 @@ Customer Trust Team, TallyBridge Software
               <Mail className="w-5 h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <h2 className="text-base font-extrabold text-white tracking-tight">
-                  The Culprit's Official Incident Explanation (TallyBridge Software)
+                  The Culprit's Incident Explanation & Deposition
                 </h2>
                 <span className="text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded border border-amber-500/30">
-                  EXHIBIT E16 & E12
+                  {activeNoticeTab === 'E16' ? 'EXHIBIT E16 (FINAL)' : activeNoticeTab === 'E12' ? 'EXHIBIT E12 (FIRST)' : 'CUSTOM SUSPECT NOTICE'}
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Exact verbatim statements sent by TallyBridge claiming the breach was harmless and limited.
-              </p>
+              
+              {/* Suspect / Author Attribution Banner */}
+              <div className="mt-1 flex items-center gap-2 flex-wrap text-xs">
+                <span className="text-slate-400 font-medium">Author / Deponent:</span>
+                <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30 font-semibold font-mono flex items-center gap-1">
+                  <UserCheck className="w-3.5 h-3.5" />
+                  {activeNoticeTab === 'E16' || activeNoticeTab === 'E12'
+                    ? 'Customer Trust Team, TallyBridge Software (Primary Vendor)'
+                    : (savedSuspects.find(s => s.id === activeNoticeTab || s.suspectId === activeNoticeTab)?.suspectName || 'External Suspect')}
+                </span>
+                <span className="text-slate-500 text-[11px]">
+                  {activeNoticeTab === 'E16' 
+                    ? '(Official Vendor Legal Notice on 28 Aug 2026)' 
+                    : activeNoticeTab === 'E12' 
+                      ? '(Initial Customer Notice on 21 Aug 2026)' 
+                      : '(Formal Deposition / Uploaded Statement)'}
+                </span>
+              </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
-            <div className="flex bg-[#070b14] p-1 rounded-lg border border-[#1e2e4a] text-xs font-mono">
+          <div className="flex items-center gap-2 shrink-0 flex-wrap">
+            <div className="flex bg-[#070b14] p-1 rounded-lg border border-[#1e2e4a] text-xs font-mono flex-wrap gap-1">
               <button
                 onClick={() => setActiveNoticeTab('E16')}
                 className={`px-3 py-1 rounded font-bold transition-all cursor-pointer ${
                   activeNoticeTab === 'E16' ? 'bg-amber-500 text-slate-950 shadow' : 'text-slate-400 hover:text-white'
                 }`}
               >
-                E16 Final Report (28 Aug)
+                E16 TallyBridge Final
               </button>
               <button
                 onClick={() => setActiveNoticeTab('E12')}
@@ -181,8 +231,21 @@ Customer Trust Team, TallyBridge Software
                   activeNoticeTab === 'E12' ? 'bg-amber-500 text-slate-950 shadow' : 'text-slate-400 hover:text-white'
                 }`}
               >
-                E12 First Notice (21 Aug)
+                E12 TallyBridge First
               </button>
+              {savedSuspects.map((sus) => (
+                <button
+                  key={sus.id}
+                  onClick={() => setActiveNoticeTab(sus.id)}
+                  className={`px-2.5 py-1 rounded font-bold transition-all cursor-pointer flex items-center gap-1 ${
+                    activeNoticeTab === sus.id ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white'
+                  }`}
+                  title={sus.suspectName}
+                >
+                  <UserCheck className="w-3 h-3" />
+                  <span>{sus.suspectName.split(' ')[0]}</span>
+                </button>
+              ))}
             </div>
 
             <button
@@ -190,7 +253,7 @@ Customer Trust Team, TallyBridge Software
               className="px-2.5 py-1.5 rounded-lg bg-[#141b2e] hover:bg-[#1b2640] text-slate-300 text-xs font-mono border border-[#1e2e4a] flex items-center gap-1 cursor-pointer"
             >
               {showFullLetter ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-              <span>{showFullLetter ? 'Collapse' : 'Expand Full Letter'}</span>
+              <span>{showFullLetter ? 'Collapse' : 'Expand'}</span>
             </button>
           </div>
         </div>
@@ -201,70 +264,115 @@ Customer Trust Team, TallyBridge Software
             {/* Raw Email Display (5 cols) */}
             <div className="lg:col-span-5 bg-[#070a12] border border-[#1e2e4a] rounded-xl overflow-hidden font-mono text-xs">
               <div className="p-2.5 bg-[#0b101d] border-b border-[#1e2e4a] flex items-center justify-between text-[11px] text-slate-400">
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-                  <span>Original Email Body ({activeNoticeTab})</span>
+                <span className="flex items-center gap-1.5 truncate">
+                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0"></span>
+                  <span className="truncate">
+                    {activeNoticeTab === 'E16' 
+                      ? 'TallyBridge Formal Notice (E16)' 
+                      : activeNoticeTab === 'E12' 
+                        ? 'TallyBridge Initial Notice (E12)' 
+                        : (savedSuspects.find(s => s.id === activeNoticeTab || s.suspectId === activeNoticeTab)?.title || 'Suspect Explanation')}
+                  </span>
                 </span>
                 <button
-                  onClick={() => handleCopy(activeNoticeTab === 'E16' ? e16LetterText : e12LetterText)}
-                  className="hover:text-cyan-400 flex items-center gap-1 cursor-pointer"
+                  onClick={() => {
+                    const txt = activeNoticeTab === 'E16' 
+                      ? e16LetterText 
+                      : activeNoticeTab === 'E12' 
+                        ? e12LetterText 
+                        : (savedSuspects.find(s => s.id === activeNoticeTab || s.suspectId === activeNoticeTab)?.rawText || '');
+                    handleCopy(txt);
+                  }}
+                  className="hover:text-cyan-400 flex items-center gap-1 cursor-pointer shrink-0 ml-2"
                 >
                   {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
                   <span>{copied ? 'Copied' : 'Copy'}</span>
                 </button>
               </div>
               <div className="p-4 text-slate-300 leading-relaxed whitespace-pre-wrap max-h-72 overflow-y-auto select-text">
-                {activeNoticeTab === 'E16' ? e16LetterText : e12LetterText}
+                {activeNoticeTab === 'E16' 
+                  ? e16LetterText 
+                  : activeNoticeTab === 'E12' 
+                    ? e12LetterText 
+                    : (savedSuspects.find(s => s.id === activeNoticeTab || s.suspectId === activeNoticeTab)?.rawText || 'No text recorded for this suspect.')}
               </div>
             </div>
 
             {/* Core Excuses Extracted (7 cols) */}
             <div className="lg:col-span-7 space-y-2">
               <div className="text-xs font-bold text-amber-400 font-mono flex items-center justify-between">
-                <span>KEY EXCUSES GIVEN BY TALLYBRIDGE vs. FORENSIC REALITY:</span>
+                <span>
+                  {activeNoticeTab === 'E16' || activeNoticeTab === 'E12' 
+                    ? 'KEY CLAIMS GIVEN BY TALLYBRIDGE vs. FORENSIC REALITY:' 
+                    : `CROSS-EXAMINATION FOR ${(savedSuspects.find(s => s.id === activeNoticeTab || s.suspectId === activeNoticeTab)?.suspectName || 'SUSPECT').toUpperCase()}:`}
+                </span>
                 <span className="text-slate-500 font-normal">Cross-examined across 20 logs</span>
               </div>
 
               <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-                <div className="p-2.5 rounded-lg bg-[#070b14] border border-rose-500/30 text-xs space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-rose-400 font-bold font-mono">Excuse 1: "Limited to support ticket metadata"</span>
-                    <span className="text-[10px] bg-rose-500/20 text-rose-300 px-2 py-0.2 rounded font-mono font-bold">CONTRADICTED</span>
-                  </div>
-                  <p className="text-slate-300 text-[11px] leading-relaxed">
-                    <strong>Forensic Truth:</strong> LedgerOne log (E01) proves threat IPs exported 19,675 vendor records and queried payments. BlueVault (E05) proves storage key harvested from ticket TKT-48213 downloaded vendor bank details and finance statements.
-                  </p>
-                </div>
+                {activeNoticeTab === 'E16' || activeNoticeTab === 'E12' ? (
+                  <>
+                    <div className="p-2.5 rounded-lg bg-[#070b14] border border-rose-500/30 text-xs space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-rose-400 font-bold font-mono">Claim 1: "Limited to support ticket metadata"</span>
+                        <span className="text-[10px] bg-rose-500/20 text-rose-300 px-2 py-0.2 rounded font-mono font-bold">CONTRADICTED</span>
+                      </div>
+                      <p className="text-slate-300 text-[11px] leading-relaxed">
+                        <strong>Forensic Truth:</strong> LedgerOne log (E01) proves threat IPs exported 19,675 vendor records and queried payments. BlueVault (E05) proves storage key harvested from ticket TKT-48213 downloaded vendor bank details and finance statements.
+                      </p>
+                    </div>
 
-                <div className="p-2.5 rounded-lg bg-[#070b14] border border-rose-500/30 text-xs space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-rose-400 font-bold font-mono">Excuse 2: "Unauthorized requests occurred on August 11-12 only"</span>
-                    <span className="text-[10px] bg-rose-500/20 text-rose-300 px-2 py-0.2 rounded font-mono font-bold">CONTRADICTED</span>
-                  </div>
-                  <p className="text-slate-300 text-[11px] leading-relaxed">
-                    <strong>Forensic Truth:</strong> Reconnaissance occurred on 9 August (E01), 70 network flows occurred on 17-19 August (E15), and on 3 September key-tb-07 altered Coastal Packaging's bank account (E18, E19).
-                  </p>
-                </div>
+                    <div className="p-2.5 rounded-lg bg-[#070b14] border border-rose-500/30 text-xs space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-rose-400 font-bold font-mono">Claim 2: "Unauthorized requests occurred on August 11-12 only"</span>
+                        <span className="text-[10px] bg-rose-500/20 text-rose-300 px-2 py-0.2 rounded font-mono font-bold">CONTRADICTED</span>
+                      </div>
+                      <p className="text-slate-300 text-[11px] leading-relaxed">
+                        <strong>Forensic Truth:</strong> Reconnaissance occurred on 9 August (E01), 70 network flows occurred on 17-19 August (E15), and on 3 September key-tb-07 altered Coastal Packaging's bank account (E18, E19).
+                      </p>
+                    </div>
 
-                <div className="p-2.5 rounded-lg bg-[#070b14] border border-rose-500/30 text-xs space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-rose-400 font-bold font-mono">Excuse 3: "Affected credentials rotated on 24 August 2026"</span>
-                    <span className="text-[10px] bg-rose-500/20 text-rose-300 px-2 py-0.2 rounded font-mono font-bold">CONTRADICTED</span>
-                  </div>
-                  <p className="text-slate-300 text-[11px] leading-relaxed">
-                    <strong>Forensic Truth:</strong> Key <code className="text-cyan-400">key-tb-07</code> remained active in the software register on 2 September (E04) and made API calls throughout 1-7 September (E18).
-                  </p>
-                </div>
+                    <div className="p-2.5 rounded-lg bg-[#070b14] border border-rose-500/30 text-xs space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-rose-400 font-bold font-mono">Claim 3: "Affected credentials rotated on 24 August 2026"</span>
+                        <span className="text-[10px] bg-rose-500/20 text-rose-300 px-2 py-0.2 rounded font-mono font-bold">CONTRADICTED</span>
+                      </div>
+                      <p className="text-slate-300 text-[11px] leading-relaxed">
+                        <strong>Forensic Truth:</strong> Key <code className="text-cyan-400">key-tb-07</code> remained active in the software register on 2 September (E04) and made API calls throughout 1-7 September (E18).
+                      </p>
+                    </div>
 
-                <div className="p-2.5 rounded-lg bg-[#070b14] border border-rose-500/30 text-xs space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="text-rose-400 font-bold font-mono">Excuse 4: "No systems on the private link were involved"</span>
-                    <span className="text-[10px] bg-rose-500/20 text-rose-300 px-2 py-0.2 rounded font-mono font-bold">CONTRADICTED</span>
+                    <div className="p-2.5 rounded-lg bg-[#070b14] border border-rose-500/30 text-xs space-y-1">
+                      <div className="flex items-center justify-between">
+                        <span className="text-rose-400 font-bold font-mono">Claim 4: "No systems on the private link were involved"</span>
+                        <span className="text-[10px] bg-rose-500/20 text-rose-300 px-2 py-0.2 rounded font-mono font-bold">CONTRADICTED</span>
+                      </div>
+                      <p className="text-slate-300 text-[11px] leading-relaxed">
+                        <strong>Forensic Truth:</strong> Network logs (E15) prove internal build host <code className="text-amber-300">10.20.4.77</code> (tb-build-02) transferred 5.1 MB from LedgerOne on 18 August and executed the 3 September bank change.
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  // Custom suspect explanation cross-examination
+                  <div className="space-y-2">
+                    <div className="p-3 rounded-lg bg-[#070b14] border border-blue-500/30 text-xs space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-blue-400 font-bold font-mono">
+                          Deponent: {savedSuspects.find(s => s.id === activeNoticeTab || s.suspectId === activeNoticeTab)?.suspectName}
+                        </span>
+                        <span className="text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded font-mono font-bold">
+                          {savedSuspects.find(s => s.id === activeNoticeTab || s.suspectId === activeNoticeTab)?.suspectType}
+                        </span>
+                      </div>
+                      <p className="text-slate-300 text-[11px] leading-relaxed">
+                        <strong>Suspect Title:</strong> {savedSuspects.find(s => s.id === activeNoticeTab || s.suspectId === activeNoticeTab)?.title}
+                      </p>
+                      <p className="text-slate-400 text-[11px] leading-relaxed">
+                        <strong>Adjudication Status:</strong> Cross-referenced with Cloud Supabase & Vault. Click the button below to inspect sentence-by-sentence citations in the Culprit's Explanation tab.
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-slate-300 text-[11px] leading-relaxed">
-                    <strong>Forensic Truth:</strong> Network logs (E15) prove internal build host <code className="text-amber-300">10.20.4.77</code> (tb-build-02) transferred 5.1 MB from LedgerOne on 18 August and executed the 3 September bank change.
-                  </p>
-                </div>
+                )}
               </div>
             </div>
           </div>
