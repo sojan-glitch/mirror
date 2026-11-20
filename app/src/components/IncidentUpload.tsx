@@ -81,6 +81,15 @@ export const KNOWN_SUSPECTS: SuspectProfile[] = [
     defaultExplanation: `1. Build server executes automated CI/CD integration tests only.
 2. No outbound tunnel sessions to external IP ranges were maintained outside maintenance windows.
 3. Node did not issue any vendor master bank routing alteration queries on 3 September.`
+  },
+  {
+    id: 'custom',
+    name: 'Custom Target / Any Suspect (Manual Entry)',
+    type: 'Internal Staff',
+    roleOrContext: 'Investigate any individual, third-party vendor, IP address, or system. Type their name and paste their exact statement.',
+    defaultExplanation: `1. I was not involved in any unauthorized data transfer or account tampering.
+2. All actions performed during this period followed standard authorized operational procedures.
+3. Any connection records or credentials associated with my name were either forged or spoofed.`
   }
 ];
 
@@ -357,9 +366,15 @@ export const IncidentUpload: React.FC<IncidentUploadProps> = ({
 
       {/* Target Suspect Selector */}
       <div className="space-y-3">
-        <label className="block text-xs font-semibold text-slate-300">
-          Select Target Suspect / Entity Under Investigation
-        </label>
+        <div className="flex items-center justify-between">
+          <label className="block text-xs font-semibold text-slate-300">
+            Select Target Suspect / Entity Under Investigation
+          </label>
+          <span className="text-[11px] text-blue-400 font-mono">
+            {selectedSuspectId === 'custom' ? 'Manual Input Mode Active' : 'Preset Suspect Mode'}
+          </span>
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {KNOWN_SUSPECTS.map((suspect) => {
             const isSelected = selectedSuspectId === suspect.id;
@@ -375,7 +390,9 @@ export const IncidentUpload: React.FC<IncidentUploadProps> = ({
               >
                 <div className="flex items-center justify-between">
                   <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${
-                    suspect.type === 'Third-Party Vendor'
+                    suspect.id === 'custom'
+                      ? 'bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 font-bold'
+                      : suspect.type === 'Third-Party Vendor'
                       ? 'bg-amber-500/10 text-amber-300 border border-amber-500/20'
                       : suspect.type === 'Internal Staff'
                       ? 'bg-purple-500/10 text-purple-300 border border-purple-500/20'
@@ -383,7 +400,7 @@ export const IncidentUpload: React.FC<IncidentUploadProps> = ({
                       ? 'bg-rose-500/10 text-rose-300 border border-rose-500/20'
                       : 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/20'
                   }`}>
-                    {suspect.type}
+                    {suspect.id === 'custom' ? '⚡ CUSTOM SUSPECT' : suspect.type}
                   </span>
                   {isSelected && (
                     <span className="text-xs text-blue-400 font-semibold flex items-center gap-1">
@@ -400,6 +417,49 @@ export const IncidentUpload: React.FC<IncidentUploadProps> = ({
             );
           })}
         </div>
+
+        {/* Manual Suspect Name / Title Input if Custom Suspect is Selected */}
+        {selectedSuspectId === 'custom' && (
+          <div className="p-4 rounded-xl bg-gradient-to-r from-indigo-950/40 via-purple-950/30 to-indigo-950/40 border border-indigo-500/40 space-y-3 animate-fadeIn">
+            <div className="flex items-center gap-2">
+              <User className="w-4 h-4 text-indigo-400" />
+              <h3 className="text-xs font-bold text-indigo-300 uppercase tracking-wide font-mono">
+                Manual Suspect / Witness Information
+              </h3>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[11px] font-medium text-slate-300 mb-1">
+                  Suspect Name or Identifier (e.g., "Rajesh Kumar", "Gateway Router 192.168.1.1")
+                </label>
+                <input
+                  type="text"
+                  value={customSuspectName}
+                  onChange={(e) => setCustomSuspectName(e.target.value)}
+                  placeholder="Type any person, vendor, or device name..."
+                  className="w-full px-3 py-2 rounded-lg bg-[#0e121d] border border-indigo-500/40 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-400 font-mono"
+                />
+              </div>
+              <div>
+                <label className="block text-[11px] font-medium text-slate-300 mb-1">
+                  Entity Category / Designation
+                </label>
+                <select
+                  value={activeSuspect?.type || 'Internal Staff'}
+                  onChange={(e) => {
+                    if (activeSuspect) activeSuspect.type = e.target.value as any;
+                  }}
+                  className="w-full px-3 py-2 rounded-lg bg-[#0e121d] border border-indigo-500/40 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                >
+                  <option value="Internal Staff">Internal Staff / Employee</option>
+                  <option value="Third-Party Vendor">Third-Party Vendor / Contractor</option>
+                  <option value="Compromised Service Account">Service Account / API Bot</option>
+                  <option value="Threat IP">Threat IP / Host / Network Node</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Input Mode Selector */}
